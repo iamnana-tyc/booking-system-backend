@@ -1,7 +1,7 @@
 # Booking System Backend
 
 A scalable backend system for service-based businesses such as beauty studios,
-private teachers, and coaches.
+private teachers, coaches and consulting.
 
 ## Tech Stack
 - Java 17
