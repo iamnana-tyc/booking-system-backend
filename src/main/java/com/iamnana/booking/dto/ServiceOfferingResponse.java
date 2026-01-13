@@ -6,10 +6,10 @@ import java.util.List;
 
 @Data
 public class ServiceOfferingResponse {
-    private List<ServiceOfferingDTO> content;
+    private List<ServiceOfferingCreateRequest> serviceOfferings;
     private Integer pageNumber;
     private Integer pageSize;
+    private Long totalElements;
     private Integer totalPages;
-    private Integer totalNumberElements;
-    private Boolean isLastPage;
+    private boolean lastPage;
 }
