@@ -1,6 +1,7 @@
 package com.iamnana.booking.controller;
 
 import com.iamnana.booking.config.AppConstant;
+import com.iamnana.booking.dto.BusinessItemResponse;
 import com.iamnana.booking.dto.BusinessRequest;
 import com.iamnana.booking.dto.BusinessResponseDto;
 import com.iamnana.booking.service.BusinessService;
@@ -16,8 +17,8 @@ public class BusinessController {
     private final BusinessService businessService;
 
     @PostMapping("admin/business")
-    public ResponseEntity<BusinessRequest> createBusiness(@RequestBody BusinessRequest businessRequest) {
-        BusinessRequest business = businessService.createBusiness(businessRequest);
+    public ResponseEntity<BusinessItemResponse> createBusiness(@RequestBody BusinessRequest businessRequest) {
+        BusinessItemResponse business = businessService.createBusiness(businessRequest);
 
         return new ResponseEntity<>(business, HttpStatus.CREATED);
     }
