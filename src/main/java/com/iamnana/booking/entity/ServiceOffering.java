@@ -18,12 +18,17 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Getter
 @Setter
-@Table(name = "service_offerings")
+@Table(name = "service_offerings", uniqueConstraints = {
+        @UniqueConstraint(
+                name = "unique_business_service_name",
+                columnNames = {"business_id", "name"})
+})
 public class ServiceOffering extends BaseEntity {
 
     @NotBlank(message = "Service name is required.")
     @Column(nullable = false)
     private String name;
+
     private String description;
 
     @NotNull(message = "Duration is required")
