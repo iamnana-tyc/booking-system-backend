@@ -5,6 +5,8 @@ import lombok.Data;
 
 @Data
 public class BusinessRequest {
+    private Long businessId;
+
     @NotBlank
     private String name;
 
