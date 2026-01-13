@@ -1,10 +1,10 @@
 package com.iamnana.booking.controller;
 
 import com.iamnana.booking.config.AppConstant;
-import com.iamnana.booking.dto.ServiceOfferingCreateRequest;
+import com.iamnana.booking.dto.ServiceOfferingPatchRequest;
+import com.iamnana.booking.dto.ServiceOfferingRequest;
 import com.iamnana.booking.dto.ServiceOfferingResponse;
 import com.iamnana.booking.dto.ServiceOfferingResponseItem;
-import com.iamnana.booking.dto.ServiceOfferingUpdateRequest;
 import com.iamnana.booking.service.ServiceOfferingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +20,7 @@ public class ServiceOfferingController {
 
     @PostMapping("/businesses/{businessId}/services")
     public ResponseEntity<ServiceOfferingResponseItem> createServiceOffering(
-            @Valid @RequestBody ServiceOfferingCreateRequest request,
+            @Valid @RequestBody ServiceOfferingRequest request,
             @PathVariable Long businessId
     ){
         ServiceOfferingResponseItem createService = serviceOfferingService.createServiceOffering(request, businessId);
@@ -47,15 +47,15 @@ public class ServiceOfferingController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PutMapping("/businesses/{business-id}/service/{service-id}")
-    public ResponseEntity<ServiceOfferingUpdateRequest> updateServiceOffering(
-            @RequestBody ServiceOfferingUpdateRequest request,
-            @PathVariable("business-id") Long businessId,
-            @PathVariable("service-id") Long serviceId
+    @PutMapping("/businesses/{businessId}/services/{serviceId}")
+    public ResponseEntity<ServiceOfferingResponseItem> updateServiceOffering(
+            @Valid @RequestBody ServiceOfferingRequest request,
+            @PathVariable Long businessId,
+            @PathVariable Long serviceId
     ){
-        ServiceOfferingUpdateRequest createService = serviceOfferingService.updateServiceOffering(request, businessId, serviceId);
+        ServiceOfferingResponseItem updated = serviceOfferingService.updateServiceOffering(request, businessId, serviceId);
 
-        return new ResponseEntity<>(createService, HttpStatus.OK);
+        return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("admin/services/{service-id}")
@@ -83,4 +83,24 @@ public class ServiceOfferingController {
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
+    @GetMapping("/services/{serviceId}")
+    public ResponseEntity<ServiceOfferingResponseItem> getServiceOfferingById(@PathVariable Long serviceId){
+        ServiceOfferingResponseItem serviceOffering = serviceOfferingService.getServiceOfferingById(serviceId);
+
+        return new ResponseEntity<>(serviceOffering, HttpStatus.OK);
+    }
+
+    @PatchMapping("/businesses/{businessId}/services/{serviceId}")
+    public ResponseEntity<ServiceOfferingResponseItem> updateServiceOfferingById(
+            @PathVariable Long serviceId,
+            @PathVariable Long businessId,
+            @RequestBody ServiceOfferingPatchRequest request){
+        ServiceOfferingResponseItem partialUpdate = serviceOfferingService
+                .updateServiceOfferingById(serviceId,businessId, request);
+
+        return ResponseEntity.ok(partialUpdate);
+    }
+
+
 }
