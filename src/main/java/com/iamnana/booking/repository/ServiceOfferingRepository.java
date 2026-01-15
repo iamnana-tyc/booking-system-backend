@@ -6,6 +6,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.Optional;
+
 public interface ServiceOfferingRepository extends JpaRepository<ServiceOffering, Long> {
     @Query("SELECT s FROM ServiceOffering s WHERE s.name = ?1 AND s.business.id = ?2")
     ServiceOffering findByNameAndBusinessId(String name, Long businessId);
@@ -13,4 +15,8 @@ public interface ServiceOfferingRepository extends JpaRepository<ServiceOffering
     Page<ServiceOffering> findByBusinessId(Long businessId, Pageable pageable);
 
     Page<ServiceOffering> findByNameContainingIgnoreCase(String search, Pageable pageDetails);
+
+    Optional<ServiceOffering> findByIdAndBusinessId(Long serviceId, Long businessId);
+
+    boolean existsByNameAndBusinessId(String name, Long businessId);
 }
