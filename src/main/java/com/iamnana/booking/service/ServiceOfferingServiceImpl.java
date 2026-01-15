@@ -1,16 +1,17 @@
 package com.iamnana.booking.service;
 
 
-import com.iamnana.booking.dto.ServiceOfferingCreateRequest;
+import com.iamnana.booking.dto.ServiceOfferingPatchRequest;
+import com.iamnana.booking.dto.ServiceOfferingRequest;
 import com.iamnana.booking.dto.ServiceOfferingResponse;
 import com.iamnana.booking.dto.ServiceOfferingResponseItem;
-import com.iamnana.booking.dto.ServiceOfferingUpdateRequest;
 import com.iamnana.booking.entity.Business;
 import com.iamnana.booking.entity.ServiceOffering;
 import com.iamnana.booking.exception.APIException;
 import com.iamnana.booking.exception.ResourceNotFoundException;
 import com.iamnana.booking.repository.BusinessRepository;
 import com.iamnana.booking.repository.ServiceOfferingRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -31,7 +32,7 @@ public class ServiceOfferingServiceImpl implements ServiceOfferingService {
     private final BusinessRepository businessRepository;
 
     @Override
-    public ServiceOfferingResponseItem createServiceOffering(ServiceOfferingCreateRequest request, Long businessId) {
+    public ServiceOfferingResponseItem createServiceOffering(ServiceOfferingRequest request, Long businessId) {
         ServiceOffering service = serviceOfferingRepository.findByNameAndBusinessId(request.getName(), businessId);
 
         if (service != null) {
@@ -57,6 +58,9 @@ public class ServiceOfferingServiceImpl implements ServiceOfferingService {
 
     @Override
     public ServiceOfferingResponse getAllServiceOfferingsForBusiness(Long businessId, int pageNumber, int pageSize, String sortBy, String sortOrder) {
+        businessRepository.findById(businessId)
+                .orElseThrow(()-> new ResourceNotFoundException("Business", "businessId", businessId));
+
         Sort sortByAndOrder = sortOrder.equalsIgnoreCase("asc")
                 ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
@@ -65,8 +69,8 @@ public class ServiceOfferingServiceImpl implements ServiceOfferingService {
         Page<ServiceOffering> serviceOfferingPage = serviceOfferingRepository.findByBusinessId(businessId, pageable);
         List<ServiceOffering> serviceOfferings = serviceOfferingPage.getContent();
 
-        List<ServiceOfferingCreateRequest> serviceOfferingDTO = serviceOfferings.stream()
-                .map(serviceOffering -> modelMapper.map(serviceOffering, ServiceOfferingCreateRequest.class))
+        List<ServiceOfferingResponseItem> serviceOfferingDTO = serviceOfferings.stream()
+                .map(serviceOffering -> modelMapper.map(serviceOffering, ServiceOfferingResponseItem.class))
                 .toList();
 
         ServiceOfferingResponse response = new ServiceOfferingResponse();
@@ -80,10 +84,12 @@ public class ServiceOfferingServiceImpl implements ServiceOfferingService {
         return response;
     }
 
+    @Transactional
     @Override
-    public ServiceOfferingUpdateRequest updateServiceOffering(ServiceOfferingUpdateRequest request, Long businessId, Long serviceId) {
-        ServiceOffering existingServiceOffering = serviceOfferingRepository.findById(serviceId)
-                .orElseThrow(() -> new ResourceNotFoundException("ServiceOffering", "serviceId", serviceId));
+    public ServiceOfferingResponseItem updateServiceOffering(ServiceOfferingRequest request, Long businessId, Long serviceId) {
+        // Ensure that service belongs to this business.
+        ServiceOffering existingServiceOffering = serviceOfferingRepository.findByIdAndBusinessId(serviceId, businessId)
+                .orElseThrow(()-> new ResourceNotFoundException("ServiceOffering", "serviceId", serviceId));
 
         existingServiceOffering.setName(request.getName());
         existingServiceOffering.setDescription(request.getDescription());
@@ -93,11 +99,10 @@ public class ServiceOfferingServiceImpl implements ServiceOfferingService {
 
         ServiceOffering savedServiceOffering = serviceOfferingRepository.save(existingServiceOffering);
 
-        return modelMapper.map(savedServiceOffering,  ServiceOfferingUpdateRequest.class);
-
-
+        return modelMapper.map(savedServiceOffering,  ServiceOfferingResponseItem.class);
     }
 
+    @Transactional
     @Override
     public void deleteServiceOffering(Long serviceId) {
         ServiceOffering existingServiceOffering = serviceOfferingRepository.findById(serviceId)
@@ -116,8 +121,8 @@ public class ServiceOfferingServiceImpl implements ServiceOfferingService {
         Page<ServiceOffering> page = serviceOfferingRepository.findByNameContainingIgnoreCase(search, pageDetails);
         List<ServiceOffering> serviceOfferings = page.getContent();
 
-        List<ServiceOfferingCreateRequest> serviceOfferingDTO = serviceOfferings.stream()
-                .map(serviceOffering -> modelMapper.map(serviceOffering, ServiceOfferingCreateRequest.class))
+        List<ServiceOfferingResponseItem> serviceOfferingDTO = serviceOfferings.stream()
+                .map(serviceOffering -> modelMapper.map(serviceOffering, ServiceOfferingResponseItem.class))
                 .toList();
 
         if (serviceOfferingDTO.isEmpty()) {
@@ -133,5 +138,52 @@ public class ServiceOfferingServiceImpl implements ServiceOfferingService {
         response.setLastPage(page.isLast());
 
         return response;
+    }
+
+    @Override
+    public ServiceOfferingResponseItem getServiceOfferingById(Long serviceId) {
+        ServiceOffering service = serviceOfferingRepository.findById(serviceId)
+                .orElseThrow(() -> new ResourceNotFoundException("ServiceOffering", "serviceId", serviceId));
+
+        return modelMapper.map(service, ServiceOfferingResponseItem.class);
+    }
+
+    @Transactional
+    @Override
+    public ServiceOfferingResponseItem updateServiceOfferingById(Long serviceId, Long businessId,  ServiceOfferingPatchRequest request) {
+        ServiceOffering existingServiceOffering = serviceOfferingRepository.findByIdAndBusinessId(serviceId, businessId)
+                .orElseThrow(()-> new ResourceNotFoundException("ServiceOffering", "serviceId", serviceId));
+
+        if (request.getName() != null &&
+                !request.getName().equals(existingServiceOffering.getName()) &&
+                serviceOfferingRepository.existsByNameAndBusinessId(
+                        request.getName(), businessId)) {
+
+            throw new APIException("Service name already exists for this business");
+        }
+
+        if (request.getName() != null){
+            existingServiceOffering.setName(request.getName());
+        }
+
+        if (request.getDescription() != null) {
+            existingServiceOffering.setDescription(request.getDescription());
+        }
+
+        if (request.getDurationInMinutes() != null) {
+            existingServiceOffering.setDurationInMinutes(request.getDurationInMinutes());
+        }
+
+        if (request.getPrice() != null) {
+            existingServiceOffering.setPrice(request.getPrice());
+        }
+
+        if (request.getActive() != null) {
+            existingServiceOffering.setActive(request.getActive());
+        }
+
+        ServiceOffering savedServiceOffering = serviceOfferingRepository.save(existingServiceOffering);
+
+        return modelMapper.map(savedServiceOffering,  ServiceOfferingResponseItem.class);
     }
 }
