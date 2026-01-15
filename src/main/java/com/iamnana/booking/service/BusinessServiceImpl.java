@@ -1,11 +1,14 @@
 package com.iamnana.booking.service;
 
 import com.iamnana.booking.dto.BusinessItemResponse;
+import com.iamnana.booking.dto.BusinessPatchRequest;
 import com.iamnana.booking.dto.BusinessRequest;
 import com.iamnana.booking.dto.BusinessResponseDto;
 import com.iamnana.booking.entity.Business;
 import com.iamnana.booking.exception.APIException;
+import com.iamnana.booking.exception.ResourceNotFoundException;
 import com.iamnana.booking.repository.BusinessRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -24,8 +27,7 @@ public class BusinessServiceImpl implements BusinessService {
 
     @Override
     public BusinessItemResponse createBusiness(BusinessRequest businessRequest) {
-        Business existBusiness = businessRepository.findBusinessByName(businessRequest.getName());
-        if (existBusiness != null){
+        if (businessRepository.existsByName(businessRequest.getName())){
             throw new APIException("Business already exists");
         }
 
@@ -45,14 +47,14 @@ public class BusinessServiceImpl implements BusinessService {
         Page<Business> businessPage = businessRepository.findAll(pageable);
         List<Business> businesses = businessPage.getContent();
 
-        List<BusinessRequest> businessRequests = businesses.stream()
-                .map(business -> modelMapper.map(business, BusinessRequest.class))
+        List<BusinessItemResponse> businessRequests = businesses.stream()
+                .map(business -> modelMapper.map(business, BusinessItemResponse.class))
                 .toList();
 
         BusinessResponseDto response = new BusinessResponseDto();
-        response.setBusinessRequests(businessRequests);
-        response.setPageNumber(pageNumber);
-        response.setPageSize(pageSize);
+        response.setBusinesses(businessRequests);
+        response.setPageNumber(businessPage.getNumber());
+        response.setPageSize(businessPage.getSize());
         response.setTotalElements(businessPage.getTotalElements());
         response.setTotalPages(businessPage.getTotalPages());
         response.setLastPage(businessPage.isLast());
@@ -70,11 +72,11 @@ public class BusinessServiceImpl implements BusinessService {
         Page<Business> businessPage = businessRepository.findByNameContainingIgnoreCase(search, pageable);
         List<Business> businesses = businessPage.getContent();
 
-        List<BusinessRequest> businessRequests = businesses.stream()
-                .map(business -> modelMapper.map(business, BusinessRequest.class))
+        List<BusinessItemResponse> businessRequests = businesses.stream()
+                .map(business -> modelMapper.map(business, BusinessItemResponse.class))
                 .toList();
         BusinessResponseDto response = new BusinessResponseDto();
-        response.setBusinessRequests(businessRequests);
+        response.setBusinesses(businessRequests);
         response.setPageNumber(businessPage.getNumber());
         response.setPageSize(businessPage.getSize());
         response.setTotalPages(businessPage.getTotalPages());
@@ -84,4 +86,57 @@ public class BusinessServiceImpl implements BusinessService {
         return response;
     }
 
+    @Transactional
+    @Override
+    public void deleteBusiness(Long businessId) {
+        Business business = businessRepository.findById(businessId)
+                .orElseThrow(()-> new ResourceNotFoundException("Business", "businessId", businessId));
+        businessRepository.delete(business);
+    }
+
+    @Transactional
+    @Override
+    public BusinessItemResponse updateBusiness(BusinessPatchRequest businessRequest, Long businessId) {
+        Business existingBusiness = businessRepository.findById(businessId)
+                .orElseThrow(()-> new ResourceNotFoundException("Business", "businessId", businessId));
+
+        if (businessRequest.getName() != null &&
+                !businessRequest.getName().equals(existingBusiness.getName()) &&
+                businessRepository.existsByNameAndIdNot(
+                        businessRequest.getName(), businessId)) {
+
+            throw new APIException("Business name already exists");
+        }
+
+        if (businessRequest.getName() != null) {
+            existingBusiness.setName(businessRequest.getName());
+        }
+
+        if (businessRequest.getDescription() != null) {
+            existingBusiness.setDescription(businessRequest.getDescription());
+        }
+
+        if (businessRequest.getActive() != null) {
+            existingBusiness.setActive(businessRequest.getActive());
+        }
+
+        Business updatedBusiness = businessRepository.save(existingBusiness);
+
+        return modelMapper.map(updatedBusiness, BusinessItemResponse.class);
+    }
+
+    @Transactional
+    @Override
+    public BusinessItemResponse replaceBusiness(BusinessRequest request, Long businessId) {
+        Business exitingBusiness = businessRepository.findById(businessId)
+                .orElseThrow(()-> new ResourceNotFoundException("Business", "businessId", businessId));
+
+        exitingBusiness.setName(request.getName());
+        exitingBusiness.setDescription(request.getDescription());
+        exitingBusiness.setActive(request.getActive());
+
+        Business updatedBusiness = businessRepository.save(exitingBusiness);
+
+        return modelMapper.map(updatedBusiness, BusinessItemResponse.class);
+    }
 }
