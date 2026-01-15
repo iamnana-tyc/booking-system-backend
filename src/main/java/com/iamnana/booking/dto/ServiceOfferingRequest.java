@@ -8,12 +8,11 @@ import lombok.Data;
 import java.math.BigDecimal;
 
 @Data
-public class ServiceOfferingCreateRequest {
-    private Long id;
-
+public class ServiceOfferingRequest {
     @NotBlank
     private String name;
 
+    @NotBlank
     private String description;
 
     @NotNull
@@ -24,5 +23,6 @@ public class ServiceOfferingCreateRequest {
     @Positive
     private BigDecimal price;
 
+    @NotNull
     private Boolean active;
 }
