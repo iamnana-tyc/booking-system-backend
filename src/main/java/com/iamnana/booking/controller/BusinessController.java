@@ -2,9 +2,11 @@ package com.iamnana.booking.controller;
 
 import com.iamnana.booking.config.AppConstant;
 import com.iamnana.booking.dto.BusinessItemResponse;
+import com.iamnana.booking.dto.BusinessPatchRequest;
 import com.iamnana.booking.dto.BusinessRequest;
 import com.iamnana.booking.dto.BusinessResponseDto;
 import com.iamnana.booking.service.BusinessService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,14 +18,15 @@ import org.springframework.web.bind.annotation.*;
 public class BusinessController {
     private final BusinessService businessService;
 
-    @PostMapping("admin/business")
-    public ResponseEntity<BusinessItemResponse> createBusiness(@RequestBody BusinessRequest businessRequest) {
+    @PostMapping("/businesses")
+    public ResponseEntity<BusinessItemResponse> createBusiness(
+            @Valid @RequestBody BusinessRequest businessRequest) {
         BusinessItemResponse business = businessService.createBusiness(businessRequest);
 
         return new ResponseEntity<>(business, HttpStatus.CREATED);
     }
 
-    @GetMapping("/business")
+    @GetMapping("/businesses")
     public ResponseEntity<BusinessResponseDto> getAllBusinesses(
             @RequestParam(name = "pageNumber", defaultValue = AppConstant.PAGE_NUMBER,  required = false) int pageNumber,
             @RequestParam(name = "pageSize", defaultValue = AppConstant.PAGE_SIZE,  required = false) int pageSize,
@@ -35,9 +38,9 @@ public class BusinessController {
         return new ResponseEntity<>(business, HttpStatus.OK);
     }
 
-    @GetMapping("/business/{search}")
+    @GetMapping("/businesses/search")
     public ResponseEntity<BusinessResponseDto> searchBusinesses(
-            @PathVariable String search,
+            @RequestParam String search,
             @RequestParam(name = "pageNumber", defaultValue = AppConstant.PAGE_NUMBER,  required = false) int pageNumber,
             @RequestParam(name = "pageSize", defaultValue = AppConstant.PAGE_SIZE,  required = false) int pageSize,
             @RequestParam(name = "sortBy", defaultValue = AppConstant.SORT_BUSINESS_BY, required = false) String sortBy,
@@ -47,4 +50,30 @@ public class BusinessController {
         return new ResponseEntity<>(business, HttpStatus.OK);
     }
 
+    @DeleteMapping("/businesses/{businessId}")
+    public ResponseEntity<String> deleteBusiness(@PathVariable Long businessId) {
+        businessService.deleteBusiness(businessId);
+
+        return ResponseEntity.ok("Business deleted successfully");
+    }
+
+    @PatchMapping("/businesses/{businessId}")
+    public ResponseEntity<BusinessItemResponse> updateBusiness(
+            @RequestBody BusinessPatchRequest businessRequest,
+            @PathVariable Long businessId
+                                                               ) {
+        BusinessItemResponse business = businessService.updateBusiness(businessRequest, businessId);
+
+        return ResponseEntity.ok(business);
+    }
+
+    @PutMapping("/businesses/{businessId}")
+    public ResponseEntity<BusinessItemResponse> replaceBusiness(
+            @Valid @RequestBody BusinessRequest request,
+            @PathVariable Long businessId) {
+
+        return ResponseEntity.ok(
+                businessService.replaceBusiness(request, businessId)
+        );
+    }
 }
