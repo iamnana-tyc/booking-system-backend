@@ -9,4 +9,8 @@ public interface BusinessRepository extends JpaRepository<Business, Long> {
     Business findBusinessByName(String name);
 
     Page<Business> findByNameContainingIgnoreCase(String search, Pageable pageable);
+
+    boolean existsByName(String name);
+
+    boolean existsByNameAndIdNot(String name, Long businessId);
 }
