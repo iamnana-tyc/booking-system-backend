@@ -6,7 +6,7 @@ import java.util.List;
 
 @Data
 public class ServiceOfferingResponse {
-    private List<ServiceOfferingCreateRequest> serviceOfferings;
+    private List<ServiceOfferingResponseItem> serviceOfferings;
     private Integer pageNumber;
     private Integer pageSize;
     private Long totalElements;
