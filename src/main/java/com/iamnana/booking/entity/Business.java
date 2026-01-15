@@ -17,7 +17,7 @@ import lombok.Setter;
 public class Business extends BaseEntity {
 
     @NotBlank(message = "Business name is required")
-    @Column(nullable = false)
+    @Column(unique = true, nullable = false)
     private String name;
 
     private String description;
