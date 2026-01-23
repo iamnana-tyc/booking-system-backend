@@ -58,22 +58,22 @@ public class BusinessController {
     }
 
     @PatchMapping("/businesses/{businessId}")
-    public ResponseEntity<BusinessItemResponse> updateBusiness(
+    public ResponseEntity<BusinessItemResponse> partialUpdateBusiness(
             @RequestBody BusinessPatchRequest businessRequest,
             @PathVariable Long businessId
                                                                ) {
-        BusinessItemResponse business = businessService.updateBusiness(businessRequest, businessId);
+        BusinessItemResponse business = businessService.partialUpdateBusiness(businessRequest, businessId);
 
         return ResponseEntity.ok(business);
     }
 
     @PutMapping("/businesses/{businessId}")
-    public ResponseEntity<BusinessItemResponse> replaceBusiness(
+    public ResponseEntity<BusinessItemResponse> updateBusiness(
             @Valid @RequestBody BusinessRequest request,
             @PathVariable Long businessId) {
 
         return ResponseEntity.ok(
-                businessService.replaceBusiness(request, businessId)
+                businessService.updateBusiness(request, businessId)
         );
     }
 }
