@@ -96,7 +96,7 @@ public class BusinessServiceImpl implements BusinessService {
 
     @Transactional
     @Override
-    public BusinessItemResponse updateBusiness(BusinessPatchRequest businessRequest, Long businessId) {
+    public BusinessItemResponse partialUpdateBusiness(BusinessPatchRequest businessRequest, Long businessId) {
         Business existingBusiness = businessRepository.findById(businessId)
                 .orElseThrow(()-> new ResourceNotFoundException("Business", "businessId", businessId));
 
@@ -127,7 +127,7 @@ public class BusinessServiceImpl implements BusinessService {
 
     @Transactional
     @Override
-    public BusinessItemResponse replaceBusiness(BusinessRequest request, Long businessId) {
+    public BusinessItemResponse updateBusiness(BusinessRequest request, Long businessId) {
         Business exitingBusiness = businessRepository.findById(businessId)
                 .orElseThrow(()-> new ResourceNotFoundException("Business", "businessId", businessId));
 
