@@ -22,6 +22,17 @@ The API is structured for scalability, correctness, and ease of frontend integra
 * Lombok
 
 ---
+## Project Structure
+
+```
+config/
+controller/
+dto/
+entity/
+exception/
+repository/
+service/
+```
 
 ## Core Features Implemented
 
@@ -132,22 +143,6 @@ All list endpoints support:
 
 Implemented using `PageRequest` and `Sort`.
 
-
-## Project Structure
-
-```
-config/
-controller/
-dto/
-entity/
-exception/
-repository/
-service/
-```
-
-Each layer has a single responsibility and is easily testable.
-
----
 
 ### 3. Business Working Hours Management
 
