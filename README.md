@@ -149,26 +149,64 @@ Each layer has a single responsibility and is easily testable.
 
 ---
 
-## Current Status
+### 3. Business Working Hours Management
 
-✔ Business CRUD
-✔ Service Offering CRUD
-✔ PUT vs PATCH separation
-✔ Validation & uniqueness checks
-✔ Pagination, sorting, search
+Each business can define its **weekly working hours**, which are later used for **availability and booking logic**.
+
+Working hours are managed **per business** and **per day of week**.
+
+#### Endpoints
+
+| Method | Endpoint                                                      | Description                          |
+| ------ | ------------------------------------------------------------- | ------------------------------------ |
+| POST   | `/api/businesses/{businessId}/working-hours`                  | Create working hours for a day       |
+| GET    | `/api/businesses/{businessId}/working-hours`                  | Get all working hours for a business |
+| PATCH  | `/api/businesses/{businessId}/working-hours/{workingHoursId}` | Partially update working hours       |
+| DELETE | `/api/businesses/working-hours/{workingHoursId}`              | Delete working hours                 |
 
 ---
 
-## Next Possible Enhancements
+#### Key Business Rules
 
+* A business **cannot have duplicate working hours for the same day**
+
+    * Only one entry per `DayOfWeek` is allowed
+* `openTime` **must be before** `closeTime`
+* Working hours are always associated with a **valid business**
+* PATCH updates **only provided fields**
+* Existing values remain unchanged if not supplied
+
+---
+
+#### DTO Strategy — Business Working Hours
+
+* `BusinessWorkingHoursRequest` – Create working hours
+* `BusinessWorkingHoursPatchRequest` – Partial updates
+* `BusinessWorkingHoursResponse` – Response payload
+
+---
+
+#### Validation & Error Handling
+
+* Validation rules enforced:
+
+    * Valid `DayOfWeek`
+    * Valid time range (`openTime < closeTime`)
+* Errors handled via:
+
+    * `ResourceNotFoundException` – Business or working hours not found
+    * `APIException` – Duplicate working hours or invalid time ranges
+
+### Next Possible Enhancements (Updated)
+
+* Booking & availability generation based on working hours
+* Time slot generation logic
+* Holiday / closed-day overrides
 * Authentication & authorization (JWT / OAuth2)
 * Role-based access (Business Owner vs User)
 * Soft deletes
 * Integration tests (Testcontainers)
 * OpenAPI / Swagger documentation
-* Booking & availability management
-
----
 
 ## Author
 
