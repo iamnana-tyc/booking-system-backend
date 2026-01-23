@@ -11,6 +11,6 @@ public interface BusinessService {
     BusinessResponseDto getAllBusinesses(int pageNumber, int pageSize, String sortBy, String sortOrder);
     BusinessResponseDto searchBusinesses(String search, int pageNumber, int pageSize, String sortBy, String sortOrder);
     void deleteBusiness(Long businessId);
-    BusinessItemResponse updateBusiness(BusinessPatchRequest businessRequest, Long businessId);
-    BusinessItemResponse replaceBusiness(BusinessRequest request, Long businessId);
+    BusinessItemResponse partialUpdateBusiness(BusinessPatchRequest businessRequest, Long businessId);
+    BusinessItemResponse updateBusiness(BusinessRequest request, Long businessId);
 }
