@@ -16,4 +16,6 @@ public interface BusinessWorkingHoursRepository extends JpaRepository<BusinessWo
     List<BusinessWorkingHours> findByBusinessId(Long businessId);
 
     Optional<BusinessWorkingHours> findByIdAndBusinessId(Long workingHoursId, Long businessId);
+
+    boolean existsByBusinessIdAndDayOfWeek(Long businessId, DayOfWeek dayOfWeek);
 }
