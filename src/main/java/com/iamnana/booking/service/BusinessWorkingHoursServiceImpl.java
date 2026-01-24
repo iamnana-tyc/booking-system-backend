@@ -64,8 +64,9 @@ public class BusinessWorkingHoursServiceImpl implements BusinessWorkingHoursServ
     @Transactional
     @Override
     public BusinessWorkingHoursResponse partialUpdateBusinessWorkingHours(Long businessId, BusinessWorkingHoursPatchRequest request, Long workingHoursId) {
-        businessRepository.findById(businessId)
-                .orElseThrow(() -> new ResourceNotFoundException("Business", "businessId", businessId));
+        if (!businessRepository.existsById(businessId)) {
+            throw new ResourceNotFoundException("Business", "businessId", businessId);
+        }
 
         BusinessWorkingHours existingWorkHours = businessWorkingHoursRepository
                 .findByIdAndBusinessId(workingHoursId, businessId)
