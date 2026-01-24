@@ -64,7 +64,7 @@ public class BusinessWorkingHoursServiceImpl implements BusinessWorkingHoursServ
     @Transactional
     @Override
     public BusinessWorkingHoursResponse partialUpdateBusinessWorkingHours(Long businessId, BusinessWorkingHoursPatchRequest request, Long workingHoursId) {
-        Business business = businessRepository.findById(businessId)
+        businessRepository.findById(businessId)
                 .orElseThrow(() -> new ResourceNotFoundException("Business", "businessId", businessId));
 
         BusinessWorkingHours existingWorkHours = businessWorkingHoursRepository
@@ -74,8 +74,8 @@ public class BusinessWorkingHoursServiceImpl implements BusinessWorkingHoursServ
 
         if (request.getDayOfWeek() != null &&
                 !request.getDayOfWeek().equals(existingWorkHours.getDayOfWeek()) &&
-                businessWorkingHoursRepository.existsByBusinessAndDayOfWeek(business, request.getDayOfWeek())) {
-            throw new APIException("Working hours already exist for this day");
+                businessWorkingHoursRepository.existsByBusinessIdAndDayOfWeek(businessId, request.getDayOfWeek())) {
+            throw new APIException("Working hours already exist for this business on " + request.getDayOfWeek());
         }
 
         LocalTime openTime = request.getOpenTime() != null
