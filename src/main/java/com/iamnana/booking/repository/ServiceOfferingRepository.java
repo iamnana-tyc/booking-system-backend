@@ -16,7 +16,7 @@ public interface ServiceOfferingRepository extends JpaRepository<ServiceOffering
 
     Page<ServiceOffering> findByNameContainingIgnoreCase(String search, Pageable pageDetails);
 
-    Optional<ServiceOffering> findByIdAndBusinessId(Long serviceId, Long businessId);
-
     boolean existsByNameAndBusinessId(String name, Long businessId);
+
+    Optional<ServiceOffering> findByIdAndBusinessId(Long serviceId, Long businessId);
 }
