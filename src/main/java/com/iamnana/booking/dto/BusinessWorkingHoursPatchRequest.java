@@ -1,8 +1,8 @@
 package com.iamnana.booking.dto;
 
-import com.iamnana.booking.entity.DayOfWeek;
 import lombok.Data;
 
+import java.time.DayOfWeek;
 import java.time.LocalTime;
 
 @Data

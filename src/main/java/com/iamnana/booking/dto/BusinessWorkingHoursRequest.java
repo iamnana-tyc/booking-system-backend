@@ -1,9 +1,9 @@
 package com.iamnana.booking.dto;
 
-import com.iamnana.booking.entity.DayOfWeek;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
+import java.time.DayOfWeek;
 import java.time.LocalTime;
 
 @Data
