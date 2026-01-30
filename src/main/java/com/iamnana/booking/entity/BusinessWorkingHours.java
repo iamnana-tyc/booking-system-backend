@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 
+import java.time.DayOfWeek;
 import java.time.LocalTime;
 
 @Entity
