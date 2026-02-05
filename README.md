@@ -192,6 +192,76 @@ Working hours are managed **per business** and **per day of week**.
     * `ResourceNotFoundException` – Business or working hours not found
     * `APIException` – Duplicate working hours or invalid time ranges
 
+### 4. Availability Management
+
+Generates available time slots for service bookings based on business working hours and service duration.
+
+#### Endpoints
+
+| Method | Endpoint                                                                 | Description                                      |
+| ------ | ------------------------------------------------------------------------ | ------------------------------------------------ |
+| GET    | `/api/availability/businesses/{businessId}/services/{serviceId}?date=yyyy-MM-dd` | Get available time slots for a specific service |
+
+#### Key Business Rules
+
+* Returns available time slots for a **specific date**
+* Slots are generated based on:
+    * Business working hours for that day's `DayOfWeek`
+    * Service offering's `durationInMinutes`
+* If business is closed on requested day → throws `APIException`
+* Slots are generated from `openTime` to `closeTime` in service duration increments
+* Each slot has `startTime` and `endTime` calculated based on service duration
+
+### 5. Booking Management
+
+Handles booking creation, retrieval, and confirmation with validation against business hours and overlapping bookings.
+
+#### Endpoints
+
+| Method | Endpoint                                                              | Description                          |
+| ------ | --------------------------------------------------------------------- | ------------------------------------ |
+| POST   | `/api/businesses/{businessId}/services/{serviceId}/bookings`          | Create a new booking                 |
+| GET    | `/api/businesses/{businessId}/bookings`                               | Get all bookings for a business     |
+| PATCH  | `/api/businesses/{businessId}/bookings/{bookingId}/confirm`           | Confirm a pending booking           |
+
+#### Key Business Rules
+
+* **Booking Creation**:
+    * Validates business exists
+    * Validates service exists for the business
+    * Validates booking time is within business working hours
+    * Validates no overlapping bookings exist
+    * Sets initial status as `PENDING`
+    * Calculates `endTime` based on service duration
+
+* **Booking Confirmation**:
+    * Only `PENDING` bookings can be confirmed
+    * Validates no overlapping `CONFIRMED` bookings exist
+    * Updates status to `CONFIRMED`
+
+* **Validation Rules**:
+    * Business must be open on booking date
+    * Booking time must be within business hours
+    * No overlapping bookings allowed (prevent double-booking)
+    * Service must belong to the specified business
+      * Bookings have status: `PENDING`, `CONFIRMED`, `REJECTED`, `CANCELLED`
+    * Only one confirmed booking can occupy a time slot
+
+---
+
+And here's the updated DTO Strategy section for the new entities:
+
+### Availability
+
+* `AvailabilityResponse` – Contains date and list of available time slots
+* `AvailabilitySlotResponse` – Individual slot with start and end times
+
+### Booking
+
+* `BookingRequest` – Used for booking creation
+* `BookingResponse` – Response payload for booking operations
+
+
 ### Next Possible Enhancements (Updated)
 
 * Booking & availability generation based on working hours
